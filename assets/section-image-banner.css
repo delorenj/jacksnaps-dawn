@@ -508,13 +508,11 @@
 }
 
 #walrus-bowls {
-  position: fixed;
-  top: 50%;
-  left: 50%; /* start off-screen */
-  width: 1813px;
-  height: 1082px;
-  z-index: 1; /* make sure it's above the background */
-  opacity: 1;
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: 1813 / 1082;  /* This locks the aspect ratio */
+    z-index: 1; /* make sure it's above the background */
+    opacity: 1;
 }
 .centered-image-container {
     display: flex;
@@ -523,14 +521,7 @@
     height: 100vh;  /* Adjust this value if you want a different height */
 }
 
-.centered-image {
-    max-width: 100%;
-    height: auto;
-    aspect-ratio: 1813 / 1082;  /* This locks the aspect ratio */
-}
-
 .eye {
-    background: relative;
     width: 17px; /* adjust as needed */
     height: 17px; /* adjust as needed */
     background-color: white;

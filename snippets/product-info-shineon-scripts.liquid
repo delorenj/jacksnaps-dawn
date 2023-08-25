@@ -1,0 +1,974 @@
+<!-- ./snippets/product-info-shineon-scripts.liquid {% render 'shineon-version' %} -->
+
+function debounce(fn, wait) {
+  let t;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn.apply(this, args), wait);
+  };
+}
+
+{% case product-info-shineon-scripts %}
+
+  {% when 'engraving-validate-pattern' %}
+
+    {% include 'product-info-shineon-scripts' with 'showTooltip' %}
+
+    function fitTextToMaxlength(input) {
+      var maxlength = input.getAttribute('maxlength');
+      input.closest('.so-custom-field-wrap').classList.remove('input-error-maxlength');
+      return input.value = input.value.substr(0, maxlength);
+    }
+
+    function validateMaxLength(input) {
+      var inputMaxlength = input.getAttribute('maxlength');
+      if(input.value.length > inputMaxlength) {
+        input.closest('.so-custom-field-wrap').classList.add('input-error-maxlength');
+      }
+      else {
+        input.closest('.so-custom-field-wrap').classList.remove('input-error-maxlength');
+      }
+    }
+
+    if($('.so-engraving-validate-pattern').length) {
+      $('.so-engraving-validate-pattern')[0].addEventListener('input', function(){
+        var input = this,
+            pattern = input.getAttribute('data-pattern'),
+            patternMessage = input.getAttribute('data-pattern-message'),
+            engravingInputPattern = new RegExp(pattern);
+
+        var validatedStr = '';
+        for (var i = 0; i<input.value.length; i++) {
+          let letter = input.value.charAt(i);
+          if(engravingInputPattern.test(letter)) {
+            removeShowTooltip(input);
+            validatedStr += letter;
+          }
+          else {
+            showTooltip($(input.parentNode), patternMessage);
+          }
+        }
+        input.value = validatedStr;
+        validateMaxLength(input);
+      });
+      $('.so-engraving-validate-pattern')[0].addEventListener('change', function(){
+        var input = this;
+        if (input.hasAttribute('maxlength')) {
+          fitTextToMaxlength(input, 'by_pattern');
+        }
+      });
+    }
+
+
+  {% when 'font-preivew-input-events' %}
+
+    {% include 'product-info-shineon-scripts' with 'showTooltip' %}
+
+    var form = $('#{{ product_form_id }}'),
+        thumbnail_carousel = $('#{{ thumbnail_carousel }}'),
+        featured_carousel = $('#{{ featured_carousel }}'),
+        carouselContainer = $('#so-gallery-wrap'),
+        preview = {
+          settings: null,
+          callback: null,
+          product: product,
+          variant: null,
+          isInputsMultiple: false,
+          cacheInit: function(parent) {
+            this.containerPreview = parent.querySelector('.font-preview-inc-w');
+            this.containerPreviewMultiple = document.querySelectorAll('.font-preview-inc-w');
+            this.previewWrap = this.containerPreview.querySelector('.font-preview-w');
+            this.previewField = this.previewWrap.querySelector('.preview');
+            this.previewUpsideDownField = this.previewWrap.querySelector('.preview-upside-down');
+            this.input = parent.querySelector('.so-font-preview-input');
+            this.inputPattern = this.input.getAttribute('data-pattern');
+            this.counterWrap = this.input.closest('.so-custom-field-wrap').querySelector('.so-input-counter');
+            this.validateNotification = this.input.closest('.so-custom-field-wrap').querySelector('.so-input-notification');
+            this.validatePasteEmoj = this.input.closest('.so-custom-field-wrap').querySelector('.so-input-paste-validator');
+            this.smallLettersArr = 'a,q,w,e,r,y,u,i,o,p,a,s,g,j,z,x,c,v,n,m'.split(',');
+          },
+          cache: function() {
+            this.cacheInit(document);
+
+            this.fieldsWrap = document.querySelectorAll('.so-preview-field-wrap');
+            this.isInputsMultiple = this.fieldsWrap.length > 1 ? true : false;
+
+            return this;
+          },
+          rebuildCache: function(fieldWrap) {
+            this.cacheInit(fieldWrap);
+          },
+          init: function () {
+            this.cache();
+            if(this.isInputsMultiple) {
+              this.initMultipleInputsEvents();
+            }
+            else {
+              this.initEvents(this.input);
+            }
+            if(sliderPreview.isActive && !sliderPreview.isInit) {
+              sliderPreview.init();
+            }
+            form.on('variant_changed', this.variantChangedEvent.bind(this));
+            form[0].addEventListener('swatch_clicked', this.swatchClickedEvent.bind(this));
+          },
+          focusOn: function(e) {
+            var self = this,
+                fieldWrap = e.target.closest('.so-preview-field-wrap');
+            self.rebuildCache(fieldWrap);
+          },
+          initMultipleInputsEvents: function(e) {
+            var self = this;
+            this.fieldsWrap.forEach(function(elem) {
+              let input = elem.querySelector('.so-font-preview-input');
+              self.initEvents(input);
+              self.rebuildCache(elem);
+            });
+          },
+          initEvents: function(input) {
+            input.addEventListener('change', this.inputChangeEvent.bind(this));
+            input.addEventListener('beforeinput', this.inputBeforeInputEvent.bind(this));
+            input.addEventListener('input', this.inputEvent.bind(this));
+            input.addEventListener('preview.destroy', this.destroy.bind(this));
+            if(this.isInputsMultiple) {
+              input.addEventListener('focus', this.focusOn.bind(this));
+            }
+            form[0].addEventListener('submit', this.formSubmit.bind(this));
+          },
+          formSubmit: function(e) {
+            e.preventDefault();
+            this.validateMinLength(e);
+          },
+          validateMinLength: function(e) {
+            // SUS-2127 NN + Heart at the end / SUS-2270
+            if(this.input.hasAttribute('data-symbol-at-the-end')) {
+              return
+            }
+            // SUS-2263 Flower NN
+            if(this.input.getAttribute('data-flower-on-start') == 1) {
+              return
+            }
+            var minlength = this.input.getAttribute('minlength');
+            if(this.input.value.length < minlength) {
+              e.stopImmediatePropagation();
+              showTooltip($(this.input.closest('.so-custom-field-wrap')), `{{ "purchase_form_engraving_name_at_least_tooltip" | t }} ${minlength}`);
+            }
+          },
+          inputChangeEvent: function(e) {
+            if(this.input.value.length > 0) {
+              this.changePreviewText(this.fitTextToMaxlength(this.input));
+            }
+
+            // SUS-2127 NN + Heart at the end / SUS-2270
+            if(this.input.hasAttribute('data-symbol-at-the-end') && this.input.value.length != 0) {
+              var symbol = this.input.getAttribute('data-symbol-at-the-end');
+              this.previewField.textContent = this.input.value + symbol;
+            }
+
+            // SUS-2263 Flower NN
+            if(this.input.getAttribute('data-flower-on-start') == 1 && this.input.value.length > 0) {
+              var symbolAtStart = document.querySelector('.preview-flower');
+              this.previewField.textContent = symbolAtStart.textContent + this.input.value;
+            }
+          },
+          inputBeforeInputEvent: function(event) {
+            var key = this.getKeyFromInput(event);
+            this.hideNotifications();
+            if(!this.isInputValid(key)) {
+              event.preventDefault();
+              this.showNotification(key);
+            }
+            else {
+              this.checkProductMetal();
+            }
+            this.checkInputOnEmojiAndPaste(event);
+          },
+          inputEvent: function(event) {
+            if(this.input.classList.contains('live-preview-input') && !this.containerPreview.classList.contains('font-preview-live-vertical')) {
+              this.changeRightChainPosition(event);
+              if(this.containerPreview.classList.contains('font-preview-without-image')) {
+                if(this.input.value.length == 1) {
+                  this.changeLeftChainPosition(event);
+                }
+              }
+              if(this.input.value.length == 1) {
+                this.containerPreview.querySelector('.chain-right').style.opacity = 0;
+              }
+              else {
+                this.containerPreview.querySelector('.chain-right').style.opacity = 1;
+              }
+            }
+            this.validatePasteEvent();
+            this.input.value = capitalizeFirstLetterSubsequentLowercase(this.input.value);
+            this.previewField.textContent = this.input.value;
+            if(this.previewUpsideDownField) {
+              this.previewUpsideDownField.textContent = this.input.value;
+            }
+            this.input.closest('.so-custom-field-wrap').querySelector('.so-input-counter-wrap').classList.remove('so-hidden');
+            this.counterWrap.textContent = this.input.value.length;
+            this.previewField.classList.remove('so-hidden');
+            this.containerPreview.classList.remove('so-hidden');
+            if(this.input.value.length == 0) {
+              const previewStopped = new CustomEvent('preview.destroy');
+              this.input.dispatchEvent(previewStopped);
+            }
+
+            //Hack for android/samsung which doesn't work with maxlength attr
+            this.validateMaxLength(this.input);
+
+            // SUS-2127 NN + Heart at the end / SUS-2270
+            if(this.input.hasAttribute('data-symbol-at-the-end') && this.input.value.length > 0) {
+              var symbol = this.input.getAttribute('data-symbol-at-the-end');
+              this.previewField.textContent = this.input.value + symbol;
+            }
+
+            // SUS-2263 Flower NN
+            if(this.input.getAttribute('data-flower-on-start') == 1 && this.input.value.length > 0) {
+              var symbolAtStart = document.querySelector('.preview-flower');
+              this.previewField.textContent = symbolAtStart.textContent + this.input.value;
+            }
+          },
+          variantChangedEvent: function(e) {
+            this.input.setAttribute('data-selected-variant-id', this.product.current_variant.id);
+            this.checkProductMetal();
+          },
+          swatchClickedEvent: function(e) {
+            var variant_id = form[0].querySelector('input[name="id"]').value;
+            this.input.setAttribute('data-selected-variant-id', variant_id);
+            this.product.current_variant = this.product.getVariant(variant_id);
+            this.checkProductMetal();
+          },
+          changeLeftChainPosition: function(e) {
+            var self = this,
+                key = self.input.value[0].toLowerCase(),
+                lettersArr = 'f,t,a,h,b'.split(','),
+                livePreviewWrap = document.querySelector('.font-preview-inc-w'),
+                livePreviewWrapPreClass = 'font-preview-inc-w-live-preview-';
+        
+            lettersArr.forEach(function(letter) {
+              var livePreviewWrapClass = livePreviewWrapPreClass + letter;
+              if(key == letter) {
+                livePreviewWrap.classList.add(livePreviewWrapClass);
+              }
+              else {
+                livePreviewWrap.classList.remove(livePreviewWrapClass);
+              }
+            });
+          },
+          changeRightChainPosition: function(e) {
+            var self = this,
+                key = self.input.value.slice(-1);
+            var rightChain = this.previewWrap.querySelector('.chain-right'),
+                replaceRightChain = false;
+            this.smallLettersArr.forEach(function(letter) {
+              if(key == letter && self.input.value.length > 1 && key) {
+                replaceRightChain = true;
+                return false;
+              }
+            });
+            if(replaceRightChain == true) {
+              rightChain.classList.add('font-preview-small-letter');
+            }
+            else {
+              rightChain.classList.remove('font-preview-small-letter');
+            }
+            if(key == '.') {
+              rightChain.classList.add('font-preview-dot');
+            }
+            else {
+              rightChain.classList.remove('font-preview-dot');
+            }
+          },
+          checkProductMetal: function() {
+            let currentVariantMetal = this.product.current_variant.metafields.metal;
+            if(currentVariantMetal) {
+              Array.from(this.containerPreviewMultiple).map((item) => item.querySelector('.font-preview-w').setAttribute('data-metal', currentVariantMetal));
+            }
+
+            //chain images change
+            let chainImgs = this.previewWrap.querySelectorAll('.font-preview-chain img');
+            chainImgs.forEach(function(item) {
+              item.classList.remove('so-hidden');
+              if(item.getAttribute('data-metal') != currentVariantMetal) {
+                item.classList.add('so-hidden');
+              }
+            });
+          },
+          fitTextToMaxlength: function(input) {
+            var maxlength = input.getAttribute('maxlength');
+            input.closest('.so-custom-field-wrap').classList.remove('input-error-maxlength');
+            if(input.value.length > maxlength) {
+              this.counterWrap.textContent = maxlength;
+            }
+            return input.value = input.value.substr(0, maxlength);
+          },
+          changePreviewText: function(text) {
+            this.previewField.textContent = text;
+            if(this.previewUpsideDownField) {
+              this.previewUpsideDownField.textContent = text;
+            }
+          },
+          validatePasteEvent: function() {
+            var validatedStr = '';
+            for (var i = 0; i<this.input.value.length; i++) {
+              let letter = this.input.value.charAt(i);
+              if(this.isInputValid(letter)) {
+                validatedStr += letter;
+              }
+              else {
+                this.input.closest('.so-custom-field-wrap').querySelector('.so-input-paste-validator').classList.remove('so-hidden');
+              }
+            }
+            this.input.value = validatedStr;
+          },
+          getKeyFromInput: function(e) {
+            var eventKey = e.key;
+            if(e.data) {
+              eventKey = e.data;
+              if(e.data) {
+                if(e.data == ' ') {
+                  eventKey = '" "';
+                }
+                else {
+                  eventKey = e.data;
+                }
+              }
+            }
+            if(e.keyCode == 32 || e.key == ' ') {
+              eventKey = '" "'
+            }
+            return eventKey
+          },
+          checkInputOnEmojiAndPaste: function(e) {
+            let checkForEmoji = /([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g;
+            let notification = this.validatePasteEmoj;
+            if(checkForEmoji.test(e.data)) {
+              e.preventDefault();
+              notification.classList.remove('so-hidden');
+            }
+            else {
+              notification.classList.add('so-hidden');
+            }
+          },
+          validateMaxLength: function(input) {
+            var inputMaxlength = input.getAttribute('maxlength');
+            if(input.value.length > inputMaxlength) {
+              input.closest('.so-custom-field-wrap').classList.add('input-error-maxlength');
+            }
+            else {
+              input.closest('.so-custom-field-wrap').classList.remove('input-error-maxlength');
+            }
+          },
+          showNotification: function(key) {
+            this.validateNotification.style.display = 'flex';
+            this.validateNotification.textContent = key + ' isn\'t available';
+            if(window.innerWidth<768) {
+              //scrollIntoView()
+            }
+          },
+          hideNotifications: function() {
+            this.validateNotification.style.display = 'none';
+          },
+          isInputValid: function(key) {
+            var inputPatternReg = new RegExp(this.inputPattern);
+            if(!inputPatternReg.test(key) || key == 'Dead') {
+              return false
+            }
+            return true
+          },
+          destroy: function() {
+            if(this.input.getAttribute('data-flower-on-start') == 1) {
+              var previewFlower = document.querySelector('.preview-flower').textContent;
+              this.previewField.textContent = previewFlower + this.previewField.getAttribute('data-placeholder');
+            }
+            else {
+              this.previewField.textContent = this.previewField.getAttribute('data-placeholder');
+            }
+          }
+        },
+        isLivePreview = "{{ font_preview_live }}" === 'true',
+        sliderPreview = {
+          isActive: isLivePreview,
+          isInit: false,
+          parent: preview,
+          activeSliderIndex: 0,
+          init: function() {
+            this.cache();
+            this.initEvents();
+            this.isInit = true;
+          },
+          cache: function() {
+            this.previewMask = this.parent.previewWrap.querySelector('.preview-mask');
+            this.containerPreviewSlider = document.querySelector('.font-preview-inc-w-live-preview');
+          },
+          initEvents: function() {
+            this.parent.input.addEventListener('focusin', this.focusOn.bind(this));
+            this.parent.input.addEventListener('focusin', this.focusOn.bind(this));
+            this.parent.input.addEventListener('input', this.inputEvent.bind(this));
+            this.parent.input.addEventListener('preview.destroy', this.destroy.bind(this));
+            thumbnail_carousel.on('click.so_slick', function(event, slick) {
+              this.containerPreviewSlider.classList.add('so-hidden');
+            }.bind(this));
+            featured_carousel.on('click.so_slick', function(event, slick) {
+              this.containerPreviewSlider.classList.add('so-hidden');
+            }.bind(this));
+            form.on('variant_changed', this.variantChangedEvent.bind(this));
+          },
+          inputEvent: function() {
+            this.previewMask.textContent = this.parent.input.value;
+            this.showPreviewSlider(this.parent.input);
+          },
+          focusOn: function(e) {
+            if(this.parent.input.value.length > 0 && e.type == 'focusin') {
+              this.showPreviewSlider(this.parent.input);
+            }
+          },
+          variantChangedEvent: function() {
+            this.setContainerPreviewSlider();
+          },
+          setContainerPreviewSlider: function() {
+            var input = this.parent.input,
+                variant = this.parent.product.current_variant,
+                preivewImgs = this.containerPreviewSlider.querySelectorAll('.live-preview-image');
+            if(input.value.length > 0) {
+              this.containerPreviewSlider.classList.remove('so-hidden');
+            }
+            if(preivewImgs.length) {
+              preivewImgs.forEach((img) => {
+                img.classList.add('so-hidden');
+              });
+              if(input.value.length > 0) {
+                var preivewImg = this.containerPreviewSlider.querySelector('.live-preview-image[data-variant-id="' + variant.id + '"]');
+                preivewImg.classList.remove('so-hidden');
+              }
+            }
+          },
+          showPreviewSlider: function() {
+            this.setContainerPreviewSlider();
+          },
+          destroy: function() {
+            this.isInit = false;
+            this.containerPreviewSlider.classList.add('so-hidden');
+          }
+        };
+    preview.init();
+
+    {% when 'showTooltip' %}
+
+      function showTooltip(parent, message = '{{ "purchase_form_engraving_required_tooltip" | t }}') {
+        var tooltipElem = document.createElement("div");
+            tooltipElem.classList += 'required-input-tooltip';
+
+        $(tooltipElem).css({
+          'position': 'absolute',
+          'background-color': '{{ section.settings.input_error_color }}',
+          'color': '#fff',
+          'font-size': '14px',
+          'text-align': 'center',
+          'padding': '3px 10px',
+          'width': '100%'
+        });
+        parent.css('position', 'relative');
+        parent.addClass('input-error');
+        if($(parent).find('.required-input-tooltip').length < 1)
+        {
+          var elemForTooltip = parent.find('input')[0];
+          if(parent.find('.so-input-wrap').length) {
+            elemForTooltip = parent.find('.so-input-wrap')[0];
+          }
+          parent[0].insertBefore(tooltipElem, elemForTooltip);
+          tooltipElem.innerText = message
+          $(tooltipElem).show();
+        }
+
+        return $(tooltipElem)
+      }
+
+      function removeShowTooltip(input) {
+        let engravingInputWrap = input.parentNode;
+        if (engravingInputWrap.classList.contains('input-error'))
+        {
+          engravingInputWrap.classList.remove('input-error');
+          var tooltip = engravingInputWrap.querySelector('.required-input-tooltip');
+          engravingInputWrap.removeChild(tooltip);
+        }
+      }
+
+
+  {% when 'so-js-hyper-component' %}
+
+    /* SUS-2154 Hyper Component */
+
+    var form = $('#{{ product_form_id }}'),
+        thumbnail_carousel = $('#{{ thumbnail_carousel }}'),
+        featured_carousel = $('#{{ featured_carousel }}'),
+        carouselContainer = $('#so-gallery-wrap'),
+        hyperComponent = {
+          product_metafields: {{ product.metafields.shineon | json }},
+          cacheInit: function(parent) {
+            this.hyperComponent = parent.querySelector('.so-hyper-component');
+            this.hyperFields = this.hyperComponent.querySelectorAll('.so-hyper-field');
+            this.requestURL = "https://execute.shineon.com/rendering-engine/render";
+            this.productMetafieldsShineon = this.product_metafields;
+            this.zonedFieldsCanvas = this.productMetafieldsShineon.schema_v2.zoned_fields.canvas;
+            this.zonedFieldsZones = Array.from(this.productMetafieldsShineon.schema_v2.zoned_fields.zones);
+            this.payloadObj = {};
+            this.transformationIDAll = {{ product_images_transformation_id_arr | json }};
+            this.transformationWMediaObj = {};
+            this.featured_carousel = featured_carousel;
+
+            this.mediaGalleryMedia = JSON.parse(document.querySelector('.so-product-media-ids').textContent);
+
+            this.buildPayloadObj(this.transformationIDAll);
+            this.buildTransformationWMediaObj();
+          },
+          cache: function() {
+            this.cacheInit(document);
+          },
+          init: function () {
+            this.cache();
+            var self = this;
+            this.hyperFields.forEach(function(elem) {
+              self.initEvents(elem);
+            });
+            thumbnail_carousel.on('click.so_slick', this.onSlideChanged.bind(this));
+            featured_carousel.on('click.so_slick', this.onSlideChanged.bind(this));
+            featured_carousel.on('init', this.featured_carouselLoaded.bind(this));
+            featured_carousel.on('afterChange', this.onSlideAfterChanged.bind(this));
+            form.on('variant_changed', this.onSlideChanged.bind(this));
+          },
+          onSlideAfterChanged: function (e, so_slick) {
+            var self = this;
+            setTimeout(function() {
+              self.mediaGalleryMediaActive = so_slick.currentSlide;
+            }, 500);
+          },
+          initEvents: function (input) {
+            input.addEventListener('input', debounce(this.inputEvent.bind(this), 1500));
+          },
+          inputEvent: function (input) {
+            this.showHyperLoader();
+            this.setPayloadWActiveMedia(this.mediaGalleryMediaActive);
+            this.changeContent();
+            this.setHiddenInput(input);
+            this.showLabelNotification(input);
+            this.sendTransformationActive();
+            this.sendTransformationsOther();
+          },
+          showHyperLoader: function() {
+            var carouselWrap = document.getElementById('so-gallery-wrap');
+            carouselWrap.classList.add('so-sending-payload');
+            carouselWrap.classList.add('so-hyper-image-appears');
+          },
+          showLabelNotification: function(event) {
+            var input = event.target,
+                parentSoHyperInput = input.closest('.so-hyper-input-w'),
+                label = parentSoHyperInput.querySelector('label'),
+                labelTextContent = label.querySelector('.label-textcontent'),
+                labelNotification = label.querySelector('.so-updating-notification');
+            labelTextContent.classList.add('so-hidden');
+            labelNotification.classList.remove('so-hidden');
+          },
+          removeLabelNotification: function() {
+            this.hyperFields.forEach(function(input) {
+              var parentSoHyperInput = input.closest('.so-hyper-input-w'),
+                  label = parentSoHyperInput.querySelector('label'),
+                  labelTextContent = label.querySelector('.label-textcontent'),
+                  labelNotification = label.querySelector('.so-updating-notification');
+              labelTextContent.classList.remove('so-hidden');
+              labelNotification.classList.add('so-hidden');
+            });
+          },
+          featured_carouselLoaded: function (e, so_slick) {
+            var self = this;
+            self.featured_carousel = so_slick;
+            self.payloadObj.config.output_height = 1000; /*so_slick.listWidth;*/
+            self.payloadObj.config.output_width = 1000; /*so_slick.listWidth;*/
+            var carouselOverlay = document.querySelector('.hyper-preview-slider-w'),
+                carouselWrap = document.getElementById('so-gallery-wrap');;
+
+            if(self.mediaGalleryMediaActive != undefined) {
+              if(self.mediaGalleryMediaActive === 0) {
+                setTimeout(function() {
+                  self.featured_carousel.slickGoTo(0);
+                }, 1500);
+                setTimeout(function() {
+                  carouselOverlay.classList.add('so-hidden');
+                  carouselWrap.classList.remove('so-hyper-image-appears');
+                }, 2000);
+              }
+              else {
+                self.featured_carousel.slickGoTo(self.mediaGalleryMediaActive);
+                setTimeout(function() {
+                  carouselOverlay.classList.add('so-hidden');
+                  carouselWrap.classList.remove('so-hyper-image-appears');
+                }, 2000);
+              }
+            }
+            else {
+              setTimeout(function() {
+                self.mediaGalleryMediaActive = so_slick.currentSlide;
+              }, 500);
+            }
+          },
+          buildPayloadObj: function(transformationArr) {
+            this.payloadObj.design = this.productMetafieldsShineon.artwork_url;
+            this.payloadObj.transformations = transformationArr;
+            this.payloadObj.zones = this.zonedFieldsCanvas;
+            this.payloadObj.config = {};
+
+            this.payloadObj.zones = [];
+            this.zonedFieldsZones.map((zone) => {
+              let zoneObj = {};
+              zoneObj.id = zone.id;
+              zoneObj.content = "";
+              zoneObj.styles = zone.props.styles;
+              zoneObj.transform = zone.transform;
+              this.payloadObj.zones.push(zoneObj);
+            });
+          },
+          /*!!!*/ onSlideChanged: function(e) {
+            var self = this;
+            var hyperImageW = document.querySelector('.hyper-preview-slider-w');
+            setTimeout( function() {
+              hyperImageW.classList.add('so-hidden');
+              self.mediaGalleryMediaActive = self.featured_carousel.currentSlide;
+            }, 500);
+          },
+          buildTransformationWMediaObj: function() {
+            var self = this;
+            self.transformationIDAll.map((id, index) => self.transformationWMediaObj['so-' + id] = self.mediaGalleryMedia[index]);
+          },
+          setPayloadWActiveMedia: function(position) {
+            var self = this;
+            Object.keys(self.transformationWMediaObj).forEach(function(key) {
+              var transformationID = key.replace('so-', '');
+              if(self.transformationWMediaObj[key].position == position + 1) {
+                self.transformationActiveID = transformationID;
+                self.payloadObj.transformations = [transformationID];
+              }
+            });
+          },
+          featured_carouselUnslick: function() {
+            window.shineon.carousels.destroy();
+          },
+          showHyperedCarousel: function(xhr) {
+            var self = this;
+            self.featured_carouselUnslick();
+            var responseText = JSON.parse(xhr.responseText);
+            Object.keys(responseText.result).forEach(function(key) {
+              var featured_imgs_w = self.featured_carousel.$slider.find('[data-hyper-selector="' + key + '"]'),
+                  thumb_img = thumbnail_carousel.find('[data-hyper-selector="' + key + '"]')[0],
+                  renderedImage = responseText.result[key];
+              thumb_img.src = renderedImage;
+
+              featured_imgs_w.each(function () {
+                var imgs = $(this).find('img');
+                imgs.each(function() {
+                  if (this.classList.contains('so-carousel-featured')) {
+                    this.removeAttribute('data-src');
+                    this.removeAttribute('src');
+                    this.setAttribute('data-source', renderedImage);
+                  } else {
+                    $(this).remove();
+                  }
+                });
+              });
+            });
+            setTimeout(function() {
+              window.shineon.carousels.init();
+            }, 500);
+          },
+          showHyperedActiveImage: function(xhr) {
+            var self = this;
+            var responseText = JSON.parse(xhr.responseText),
+                carouselOverlay = document.querySelector('.hyper-preview-slider-w'),
+                carouselOverlayImg = carouselOverlay.querySelector('.hyper-preview-img');
+
+            carouselOverlayImg.src = responseText.result[self.transformationActiveID];
+            carouselOverlay.classList.remove('so-hidden');
+            setTimeout(function() {
+              var carouselWrap = document.getElementById('so-gallery-wrap');
+              carouselWrap.classList.remove('so-sending-payload');
+              self.removeLabelNotification();
+            }, 1500);
+          },
+          sendTransformationActive: function() {
+            var self = this;
+            self.sendPayload(self.showHyperedActiveImage.bind(self));
+          },
+          sendTransformationsOther: function() {
+            var self = this;
+            self.payloadObj.transformations = self.transformationIDAll;
+            self.sendPayload(self.showHyperedCarousel.bind(self));
+          },
+          changeContent: function() {
+            this.payloadObj.zones.map((field) => {
+              let hyperInput = document.querySelector('[data-zone-id="' + field.id + '"]').querySelector('.so-hyper-field');
+
+              field.content = hyperInput.value;
+            })
+          },
+          setHiddenInput: function(event) {
+            var input = event.target,
+                input_selector = input.getAttribute('data-hyper-zone-id'),
+                input_selector_value = '[name="properties[_hyper['+ input_selector + ']]"]';
+
+            document.querySelector(input_selector_value).value = input.value;
+          },
+          sendPayload: function(callback) {
+            var xhr = new XMLHttpRequest();
+            var url = this.requestURL;
+            xhr.open("POST", url, true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onreadystatechange = function(self) {
+              if (xhr.readyState === 4 && xhr.status === 200) {
+                if (typeof callback === "function") {
+                  callback(xhr);
+                }
+              }
+            }
+            var data = JSON.stringify(this.payloadObj);
+            xhr.send(data);
+          }
+
+        };
+
+    hyperComponent.init();
+    /* /. SUS-2154 Hyper Component */
+
+
+  {% when 'variant_picker_scripts' %}
+
+    class SoVariantSelects extends HTMLElement {
+      constructor() {
+        super();
+        this.form = document.getElementById({{ product_form_id | json}});
+        this.addEventListener('change', this.onVariantChange);
+        window.addEventListener('load', this.setOriginalVariant.bind(this, false));
+      }
+
+      onVariantChange(e) {
+        this.updateOptions();
+        this.updateMasterId();
+        this.renderProductInfo();
+
+        if (!this.currentVariant) {
+        } else {
+          this.updateURL();
+          this.updateShareUrl();
+          if(this.hasAttribute('data-flower-necklace')) {
+            this.changeFlowerMetal();
+          }
+        }
+        if(this.hasAttribute('data-font-preview-multiple')) {
+          this.fontPreviewMultiple();
+        }
+      }
+
+      updateOptions() {
+        this.options = Array.from(this.querySelectorAll('select'), (select) => select.value);
+      }
+
+      updateMasterId() {
+        this.currentVariant = this.getVariantData().find((variant) => {
+          return !variant.options.map((option, index) => {
+            return this.options[index] === option;
+          }).includes(false);
+        });
+      }
+
+      updateURL() {
+        if (!this.currentVariant || this.dataset.updateUrl === 'false') return;
+        window.history.replaceState({ }, '', `${this.dataset.url}?variant=${this.currentVariant.id}`);
+      }
+
+      updateShareUrl() {
+        const shareButton = document.getElementById(`Share-${this.dataset.section}`);
+        if (!shareButton || !shareButton.updateUrl) return;
+        shareButton.updateUrl(`${window.shopUrl}${this.dataset.url}?variant=${this.currentVariant.id}`);
+      }
+
+      renderProductInfo() {
+        this.product = window.shineon.product;
+        $(this.form).trigger('variant_changed', [this.product, this.currentVariant]);
+        const event = new Event('swatch_clicked');
+        this.form.dispatchEvent(event);
+      }
+
+      getVariantData() {
+        this.variantData = this.variantData || JSON.parse(document.querySelector('.so-product-variants').textContent);
+        return this.getVariantMetafields(this.variantData);
+      }
+
+      // Extend Variants w/ Shineon metafields obj
+      getVariantMetafields(variantData) {
+        this.variants = [];
+        var productVariantsMetafields = document.querySelectorAll('.so-variant-metafields');
+        for (var i = 0; i < variantData.length; i++) {
+          var variantMetafieldsData = JSON.parse(productVariantsMetafields[i].textContent);
+          var variant = variantData[i];
+          variant.metafields = variantMetafieldsData;
+          this.variants.push(variant);
+        }
+        return this.variants;
+      }
+
+      setOriginalVariant(variantData) {
+        if (this.querySelector('.so-selected-variant')) {
+          var selectedVariant = JSON.parse(this.querySelector('.so-selected-variant').textContent);
+          var selectedVariantMetafields = JSON.parse(this.querySelector('.so-selected-variant-metafields').textContent);
+          selectedVariant.metafields = selectedVariantMetafields;
+          this.currentVariant = selectedVariant;
+
+          var selector = '';
+          for (var i = 0; i < selectedVariant.options.length; i++) {
+            var option = selectedVariant.options[i],
+                index = i + 1;
+            selector += '[option' + index + '="' + option + '"]';
+            for (let j = 0; j < document.querySelectorAll('[data-option="option' + index +'"]').length; j++) {
+              const input = document.querySelectorAll('[data-option="option' + index +'"]')[j];
+              if(input.value == option) {
+                input.checked = true;
+              }
+            }
+          }
+
+          if (document.querySelector('[engravings="0"]')) {
+            document.querySelector('[engravings="0"]').checked = true;
+          }
+          else if (document.querySelector(selector)) {
+            document.querySelector(selector).checked = true;
+          }
+
+          this.updateURL();
+          this.renderProductInfo();
+          this.updateShareUrl();
+        }
+      }
+    }
+
+    customElements.define('so-variant-selects', SoVariantSelects);
+
+    class SoVariantRadios extends SoVariantSelects {
+      constructor() {
+        super();
+
+        this.fieldSets = Array.from(this.querySelectorAll('.product-form__input'));
+        if(this.fieldSets.length) {
+          this.overFlowText();
+        }
+      }
+
+      updateOptions() {
+        const fieldsets = Array.from(this.querySelectorAll('fieldset'));
+        this.options = fieldsets.map((fieldset) => {
+          return Array.from(fieldset.querySelectorAll('input')).find((radio) => radio.checked).value;
+        });
+      }
+
+      overFlowText() {
+        this.fieldSets.map(function(fieldset) {
+          let soSwatchesW = fieldset.querySelector('.so-swatches-w');
+          let soSwatchLabels = Array.from(fieldset.querySelectorAll('.so-swatch label'));
+          soSwatchLabels.map(function(label) {
+            let labelText = label.querySelector('.is-text-oveflowed');
+            if(labelText.offsetWidth > label.offsetWidth) {
+              soSwatchesW.classList.add('text-overflowed');
+            }
+          });
+        });
+      }
+
+      changeFlowerMetal() {
+        var option3Selected = Array.from(this.querySelectorAll('[data-option="option3"]')).filter((item) => item.checked == true)[0],
+            flowerCode = option3Selected ? option3Selected.getAttribute('data-flower-code') : null,
+            previewFlower = document.querySelector('.preview-flower'),
+            previewField = document.querySelector('.preview-with-flower'),
+            previewInput = document.querySelector('.so-font-preview-input');
+        if(flowerCode && previewFlower) {
+          previewFlower.textContent = flowerCode;
+          var previewText = flowerCode + previewField.getAttribute('data-placeholder');
+          if(previewInput.value.length > 0) {
+            previewText = flowerCode + previewInput.value;
+          }
+          previewField.textContent = previewText;
+        }
+        var metal = this.currentVariant.metafields.metal;
+        if(metal) {
+          var swatches = this.querySelectorAll('.so-swatch-item');
+          swatches.forEach(function(swatch) {
+            var flowers = swatch.querySelectorAll('.so-svg-wrap');
+            flowers.forEach(function(flower) {
+              if(flower.getAttribute('data-metal') != metal) {
+                flower.classList.add('so-hidden');
+              }
+              else {
+                flower.classList.remove('so-hidden');
+              }
+            });
+          });
+        }
+      }
+
+      fontPreviewMultiple() {
+        var self = this;
+    
+        self.showMultipleInputs();
+        self.hideNotification();
+      }
+
+      hideNotification() {
+        var self = this;
+        const fontPreviewInputsW = Array.from(document.querySelectorAll('.so-preview-field-wrap'));
+        fontPreviewInputsW.forEach(function(field, index){
+          let pasteValidator = field.querySelector('.so-input-paste-validator'),
+              inputNotification = field.querySelector('.so-input-notification');
+
+          field.classList.remove('input-error');
+          var fontPreviewInputTooltip = Array.from(field.querySelectorAll('.required-input-tooltip'));
+          if(fontPreviewInputTooltip.length > 0) {
+            fontPreviewInputTooltip.forEach(function(item) {
+              field.removeChild(item);
+            });
+          }
+          inputNotification.style.display = 'none';
+          pasteValidator.classList.add('so-hidden');
+        });
+      }
+
+      showMultipleInputs() {
+        var self = this;
+        const fontPreviewInputsW = Array.from(document.querySelectorAll('.so-preview-field-wrap'));
+        var engraving_to_show = self.currentVariant.metafields.engravings - 1;
+        fontPreviewInputsW.forEach(function(field, index){
+          var fontPreviewInput = field.querySelector('.so-engraving-input');
+          if(index <= engraving_to_show) {
+            field.classList.remove('so-hidden');
+            if(fontPreviewInput.hasAttribute('data-required')) {
+              fontPreviewInput.setAttribute('required', true);
+              fontPreviewInput.removeAttribute('data-required');
+            }
+          }
+          else {
+            field.classList.add('so-hidden');
+            fontPreviewInput.value = '';
+            var eventChange = new Event('change', {"bubbles":true, "cancelable":false});
+            var eventKeyUp = new Event('keyup', {"bubbles":true, "cancelable":false});
+            fontPreviewInput.dispatchEvent(eventChange);
+            fontPreviewInput.dispatchEvent(eventKeyUp);
+            if(fontPreviewInput.hasAttribute('required')) {
+              fontPreviewInput.removeAttribute('required');
+              fontPreviewInput.setAttribute('data-required', 1);
+            }
+            let fontPreview = fontPreviewInput.closest('.so-preview-field-wrap').querySelector('.preview');
+            fontPreview.textContent = fontPreview.getAttribute('data-placeholder');
+            fontPreviewInput.closest('.so-preview-field-wrap').querySelector('.so-input-counter-wrap').classList.add('so-hidden');
+          }
+        })
+      }
+    }
+
+    customElements.define('so-variant-radios', SoVariantRadios);
+
+{% endcase %}

@@ -1,0 +1,16 @@
+<!-- SHINEON LOOX REVIEWS {% render 'shineon-version' %} -->
+<!-- DO NOT MODIFY THIS FILE -->
+
+{{ 'so-section-reviews.css' | asset_url | stylesheet_tag }}
+
+<section id="ShineOnReviews-{{ section.id }}" class="so-loox-reviews so-hidden shineon-theme shineon-theme--primary page-width section-{{ section.id }}-padding" data-section="{{ section.id }}">
+    {%- render 'product-info-shineon', product: product, shop: shop, product-info-shineon: 'so-loox-reviews-list' -%}
+</section>
+
+{% schema %}
+{
+  "name": "ShineOn Reviews",
+  "tag": "section",
+  "class": "section"
+}
+{% endschema %}

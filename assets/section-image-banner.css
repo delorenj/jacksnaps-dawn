@@ -479,3 +479,81 @@
     color: currentColor;
   }
 }
+
+@keyframes horizontalMovement {
+  0%, 100% {
+    left: -20%;
+  }
+  100% {
+    left: 120%;
+  }
+}
+@keyframes combinedMovement {
+  0%, 100% {
+    transform: translateY(-5px) rotate(-3deg);
+  }
+  50% {
+    transform: translateY(5px) rotate(3deg);
+  }
+}
+#jaggle-shark {
+  position: fixed;
+  top: 0;
+  left: -20%; /* start off-screen */
+  width: 197px;
+  height: 185px;
+  z-index: 1; /* make sure it's above the background */
+  opacity: 1;
+  animation: horizontalMovement 65s linear infinite, combinedMovement 4s ease-in-out infinite;
+}
+
+#walrus-bowls {
+  position: fixed;
+  top: 50%;
+  left: 50%; /* start off-screen */
+  width: 1813px;
+  height: 1082px;
+  z-index: 1; /* make sure it's above the background */
+  opacity: 1;
+}
+
+.eye {
+    background: relative;
+    width: 17px; /* adjust as needed */
+    height: 17px; /* adjust as needed */
+    background-color: white;
+    border-radius: 50%;
+    overflow: hidden;
+    z-index: 1
+}
+
+#left-eye {
+  background: fixed;
+  left: 43.2%;
+  top: 64%;
+}
+
+#right-eye {
+  background: fixed;
+  left: 61.5%;
+  top: 66.3%;
+}
+
+.pupil {
+    background: fixed;
+    display: inline-block !important;
+    width: 8px; /* adjust as needed */
+    height: 8px; /* adjust as needed */
+    background-color: black;
+    border-radius: 50%;
+    left: 50%;
+    top: 50%;
+    z-index: 2;
+    transform: translate(-50%, -50%);
+}
+
+#left-pupil, #right-pupil {
+    background: absolute;
+    left: 50%;
+    right: 50%;`
+}

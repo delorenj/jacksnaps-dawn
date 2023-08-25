@@ -1,0 +1,21 @@
+development:
+  password: shptka_7a108895fc6de26b92ccf53023d4f1f4
+  theme_id: "158242406696"
+  store: jacksnaps-dev.myshopify.com
+  proxy: http://localhost:3000
+  ignore_files:
+    - "*.gif"
+    - "*.jpg"
+    - config/settings_data.json
+#production:
+#  password: 16ef663594568325d64408ebcdeef528
+#  theme_id: "456"
+#  store: can-i-buy-a-feeling.myshopify.com
+#  timeout: 60s
+#  readonly: true
+#test:
+#  password: 16ef663594568325d64408ebcdeef528
+#  theme_id: "789"
+#  store: can-i-buy-a-feeling.myshopify.com
+#  ignores: ignore.txt
+

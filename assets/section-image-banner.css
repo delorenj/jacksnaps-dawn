@@ -516,6 +516,18 @@
   z-index: 1; /* make sure it's above the background */
   opacity: 1;
 }
+.centered-image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;  /* Adjust this value if you want a different height */
+}
+
+.centered-image {
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: 1813 / 1082;  /* This locks the aspect ratio */
+}
 
 .eye {
     background: relative;

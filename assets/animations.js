@@ -91,9 +91,26 @@ function percentageSeen(element) {
   return Math.round(percentage);
 }
 
+function initializeWalrusBowls() {
+  const walrusBowlElement = document.getElementById('walrus-bowls');
+  const imageBannerElement = document.getElementsByClassName('banner')[0];
+  let bannerHeight = imageBannerElement.offsetHeight;
+  let viewportHeight = window.innerHeight;
+
+  // Limit bannerHeight to max of viewportHeight
+  bannerHeight = Math.min(bannerHeight, viewportHeight-150);
+
+  walrusBowlElement.style.top = bannerHeight + 'px';}
+
 window.addEventListener('DOMContentLoaded', () => {
   initializeScrollAnimationTrigger();
   initializeScrollZoomAnimationTrigger();
+  initializeWalrusBowls();
+});
+
+// Add event listeners for window resize
+window.addEventListener('resize', () => {
+  initializeWalrusBowls();
 });
 
 if (Shopify.designMode) {

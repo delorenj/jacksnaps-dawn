@@ -2,6 +2,28 @@ const SCROLL_ANIMATION_TRIGGER_CLASSNAME = 'scroll-trigger';
 const SCROLL_ANIMATION_OFFSCREEN_CLASSNAME = 'scroll-trigger--offscreen';
 const SCROLL_ZOOM_IN_TRIGGER_CLASSNAME = 'animate--zoom-in';
 const SCROLL_ANIMATION_CANCEL_CLASSNAME = 'scroll-trigger--cancel';
+const shark = document.getElementById('jaggle-shark');
+const leftEye = document.getElementById('left-eye');
+const rightEye = document.getElementById('right-eye');
+const leftPupil = leftEye.querySelector('.pupil');
+const rightPupil = rightEye.querySelector('.pupil');
+const RADIAN = Math.PI / 180;
+const ATAN = 180 / Math.PI;
+let cursorMoving = false;
+let cursorX = 0;
+let cursorY = 0;
+
+const handleMouseMove = (event) => {
+
+  clearTimeout(timeout);
+
+  timeout = setTimeout((event) => {
+    cursorMoving = true;
+    cursorX = event.clientX;
+    cursorY = event.clientY;
+  }, 100);
+
+};
 
 // Scroll in animation logic
 function onIntersection(elements, observer) {
@@ -33,7 +55,7 @@ function initializeScrollAnimationTrigger(rootEl = document, isDesignModeEvent =
   }
 
   const observer = new IntersectionObserver(onIntersection, {
-    rootMargin: '0px 0px -50px 0px',
+    rootMargin: '0px 0px -50px 0px'
   });
   animationTriggerElements.forEach((element) => observer.observe(element));
 }
@@ -95,7 +117,7 @@ function initializeWalrusBowls() {
   const walrusBowlElement = document.getElementById('walrus-bowls');
   const imageBannerElement = document.getElementsByClassName('banner')[0];
   let bannerHeight = imageBannerElement.offsetHeight;
-  const walrusLeftPosition = walrusBowlElement.offsetLeft - walrusBowlElement.width/2
+  const walrusLeftPosition = walrusBowlElement.offsetLeft - walrusBowlElement.width / 2;
   const viewportHeight = window.innerHeight;
   const leftEye = document.getElementById('left-eye');
   const rightEye = document.getElementById('right-eye');
@@ -107,38 +129,113 @@ function initializeWalrusBowls() {
   const leftEyeYOffset = leftEyeYH * walrusBowlElement.offsetHeight;
   const rightEyeXOffset = rightEyeXW * walrusBowlElement.offsetWidth;
   const rightEyeYOffset = rightEyeYH * walrusBowlElement.offsetHeight;
-  const eyeScaleFactor = 0.020982882385422; // imgWidth * eyeScaleFactor = eyeSize
+  const nativeImageWidth = 1811; // px
+  const nativeEyeWidth = 50; // px
+  const eyeScaleFactor = (nativeEyeWidth / nativeImageWidth).toFixed(4);
+  const halfNativeEyeWidth = nativeEyeWidth / 2;
   // Limit bannerHeight to max of viewportHeight
-  bannerHeight = Math.min(bannerHeight, viewportHeight-150);
+  bannerHeight = Math.min(bannerHeight, viewportHeight - 150);
 
   walrusBowlElement.style.top = bannerHeight + 'px';
 
   // Position eyes
-  leftEye.style.top = bannerHeight + leftEyeYOffset - 19 + 'px';
-  leftEye.style.left = walrusLeftPosition + leftEyeXOffset  - 19 + 'px';
-
-  rightEye.style.top = bannerHeight + rightEyeYOffset - 19 + 'px';
-  rightEye.style.left = walrusLeftPosition + rightEyeXOffset - 19 + 'px';
+  leftEye.style.top = bannerHeight + leftEyeYOffset - halfNativeEyeWidth + 'px';
+  leftEye.style.left = walrusLeftPosition + leftEyeXOffset - halfNativeEyeWidth + 'px';
+  rightEye.style.top = bannerHeight + rightEyeYOffset - halfNativeEyeWidth + 'px';
+  rightEye.style.left = walrusLeftPosition + rightEyeXOffset - halfNativeEyeWidth + 'px';
 
   // Scale eyes
-  const scaleFactor = walrusBowlElement.width * eyeScaleFactor
-  leftEye.transform = 'scale(' + eyeScaleFactor + ')';
-  leftEye.style.height = walrusBowlElement.width * eyeScaleFactor + 'px';
-  rightEye.style.width = walrusBowlElement.width * eyeScaleFactor + 'px';
-  rightEye.style.height = walrusBowlElement.width * eyeScaleFactor + 'px';
+  const scaleFactor = walrusBowlElement.width * eyeScaleFactor;
+  const eyeScale = (scaleFactor / nativeEyeWidth).toFixed(4);
+  const scaleExp = 'scale(' + eyeScale + ')';
+  leftEye.style.transform = scaleExp;
+  rightEye.style.transform = scaleExp;
+}
 
+function getAngleToCursor(eye) {
 
+  // Get eye coordinates
+  const eyeX = eye.offsetLeft + eye.offsetWidth / 2;
+  const eyeY = eye.offsetTop + eye.offsetHeight / 2;
+
+  // Calculate angle
+  return Math.atan2(cursorY - eyeY, cursorX - eyeX) * ATAN;
+}
+
+function trackJaggleShark() {
+  //console.log(shark.offsetLeft + 'px');
+  // Get shark coordinates
+  const sharkX = shark.offsetLeft + shark.offsetWidth / 2;
+  const sharkY = shark.offsetTop + shark.offsetHeight / 2;
+
+  // Get eyes coordinates
+  const leftEyeX = leftEye.offsetLeft + leftEye.offsetWidth / 2;
+  const leftEyeY = leftEye.offsetTop + leftEye.offsetHeight / 2;
+
+  const rightEyeX = rightEye.offsetLeft + rightEye.offsetWidth / 2;
+  const rightEyeY = rightEye.offsetTop + rightEye.offsetHeight / 2;
+
+  let leftAngle, rightAngle;
+  // Calculate angles
+  if (cursorMoving) {
+    //Look at cursor instead of Jaggle Shark
+    leftAngle = getAngleToCursor(leftEye);
+    rightAngle = getAngleToCursor(rightEye);
+
+  } else {
+    leftAngle = Math.atan2(sharkY - leftEyeY, sharkX - leftEyeX) * ATAN;
+    rightAngle = Math.atan2(sharkY - rightEyeY, sharkX - rightEyeX) * ATAN;
+  }
+  // Convert angle to radians
+  const leftRadAngle = leftAngle * RADIAN;
+
+  // Get x and y coords from sine and cosine
+  const lx = Math.cos(leftRadAngle);
+  const ly = Math.sin(leftRadAngle);
+
+  // Map range -1 to 1
+  const lxPercent = (lx + 1) / 2 * 100;
+  const lyPercent = (ly + 1) / 2 * 100;
+
+  // Set position
+  leftPupil.style.left = lxPercent + '%';
+  leftPupil.style.top = lyPercent + '%';
+
+  const rightRadAngle = rightAngle * RADIAN;
+
+  // Get x and y coords from sine and cosine
+  const rx = Math.cos(rightRadAngle);
+  const ry = Math.sin(rightRadAngle);
+
+  // Map range -1 to 1
+  const rxPercent = (rx + 1) / 2 * 100;
+  const ryPercent = (ry + 1) / 2 * 100;
+
+  // Set position
+  rightPupil.style.left = rxPercent + '%';
+  rightPupil.style.top = ryPercent + '%';
 }
 
 window.addEventListener('DOMContentLoaded', () => {
   initializeScrollAnimationTrigger();
   initializeScrollZoomAnimationTrigger();
   initializeWalrusBowls();
+  setInterval(trackJaggleShark, 100);
 });
 
 // Add event listeners for window resize
 window.addEventListener('resize', () => {
   initializeWalrusBowls();
+});
+
+document.addEventListener('mousemove', (event) => {
+  cursorMoving = true;
+  cursorX = event.clientX;
+  cursorY = event.clientY;
+});
+
+document.addEventListener('mousestop', () => {
+  cursorMoving = false;
 });
 
 if (Shopify.designMode) {

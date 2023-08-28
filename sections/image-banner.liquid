@@ -68,15 +68,13 @@
                 height="1082"
                 loading="lazy"
         >
+        <div id="left-eye" class="eye">
+            <div id="left-pupil" class="pupil"></div>
+        </div>
+        <div id="right-eye" class="eye">
+            <div id="right-pupil" class="pupil"></div>
+        </div>
     </div>
-    <!--
-      <div id="left-eye" class="eye">
-        <div id="left-pupil" class="pupil"></div>
-      </div>
-      <div id="right-eye" class="eye">
-        <div id="right-pupil" class="pupil"></div>
-      </div>
-    -->
     {%- if section.settings.image != blank -%}
         <div class="banner__media media{% if section.settings.image == blank and section.settings.image_2 == blank %} placeholder{% endif %}{% if section.settings.image_2 != blank %} banner__media-half{% endif %}{% if section.settings.image_behavior != 'none' %} animate--{{ section.settings.image_behavior }}{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}">
             {%- liquid

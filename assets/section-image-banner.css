@@ -541,13 +541,11 @@
 }
 
 #left-eye {
-    background: fixed;
     left: 43.2%;
     top: 64%;
 }
 
 #right-eye {
-    background: fixed;
     left: 61.5%;
     top: 66.3%;
 }

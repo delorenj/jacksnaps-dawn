@@ -100,7 +100,8 @@ function initializeWalrusBowls() {
   // Limit bannerHeight to max of viewportHeight
   bannerHeight = Math.min(bannerHeight, viewportHeight-150);
 
-  walrusBowlElement.style.top = bannerHeight + 'px';}
+  walrusBowlElement.style.top = bannerHeight + 'px';
+}
 
 window.addEventListener('DOMContentLoaded', () => {
   initializeScrollAnimationTrigger();

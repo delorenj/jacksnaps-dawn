@@ -95,12 +95,39 @@ function initializeWalrusBowls() {
   const walrusBowlElement = document.getElementById('walrus-bowls');
   const imageBannerElement = document.getElementsByClassName('banner')[0];
   let bannerHeight = imageBannerElement.offsetHeight;
-  let viewportHeight = window.innerHeight;
-
+  const walrusLeftPosition = walrusBowlElement.offsetLeft - walrusBowlElement.width/2
+  const viewportHeight = window.innerHeight;
+  const leftEye = document.getElementById('left-eye');
+  const rightEye = document.getElementById('right-eye');
+  const leftEyeXW = 0.342352291551629;
+  const leftEyeYH = 0.122735674676525;
+  const rightEyeXW = 0.775041413583655;
+  const rightEyeYH = 0.143900184842884;
+  const leftEyeXOffset = leftEyeXW * walrusBowlElement.offsetWidth;
+  const leftEyeYOffset = leftEyeYH * walrusBowlElement.offsetHeight;
+  const rightEyeXOffset = rightEyeXW * walrusBowlElement.offsetWidth;
+  const rightEyeYOffset = rightEyeYH * walrusBowlElement.offsetHeight;
+  const eyeScaleFactor = 0.020982882385422; // imgWidth * eyeScaleFactor = eyeSize
   // Limit bannerHeight to max of viewportHeight
   bannerHeight = Math.min(bannerHeight, viewportHeight-150);
 
   walrusBowlElement.style.top = bannerHeight + 'px';
+
+  // Position eyes
+  leftEye.style.top = bannerHeight + leftEyeYOffset - 19 + 'px';
+  leftEye.style.left = walrusLeftPosition + leftEyeXOffset  - 19 + 'px';
+
+  rightEye.style.top = bannerHeight + rightEyeYOffset - 19 + 'px';
+  rightEye.style.left = walrusLeftPosition + rightEyeXOffset - 19 + 'px';
+
+  // Scale eyes
+  const scaleFactor = walrusBowlElement.width * eyeScaleFactor
+  leftEye.transform = 'scale(' + eyeScaleFactor + ')';
+  leftEye.style.height = walrusBowlElement.width * eyeScaleFactor + 'px';
+  rightEye.style.width = walrusBowlElement.width * eyeScaleFactor + 'px';
+  rightEye.style.height = walrusBowlElement.width * eyeScaleFactor + 'px';
+
+
 }
 
 window.addEventListener('DOMContentLoaded', () => {

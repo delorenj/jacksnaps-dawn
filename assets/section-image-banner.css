@@ -532,28 +532,23 @@
 }
 
 .eye {
-    width: 17px; /* adjust as needed */
-    height: 17px; /* adjust as needed */
+    position: fixed;
+    top: 110%;
+    width: 38px; /* adjust as needed */
+    height: 38px; /* adjust as needed */
     background-color: white;
     border-radius: 50%;
     overflow: hidden;
-    z-index: 1
-}
+    z-index: 1;
+    transition: top 1s ease-in-out;
 
-#left-eye {
-    left: 43.2%;
-    top: 64%;
-}
-
-#right-eye {
-    left: 61.5%;
-    top: 66.3%;
 }
 
 .pupil {
+    position: relative;
     display: inline-block !important;
-    width: 8px; /* adjust as needed */
-    height: 8px; /* adjust as needed */
+    width: 18px; /* adjust as needed */
+    height: 18px; /* adjust as needed */
     background: black fixed;
     border-radius: 50%;
     left: 50%;

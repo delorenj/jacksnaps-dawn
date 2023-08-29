@@ -10,20 +10,30 @@ const rightPupil = rightEye.querySelector('.pupil');
 const RADIAN = Math.PI / 180;
 const ATAN = 180 / Math.PI;
 let cursorMoving = false;
+let lastMoved;
+let timeout;
 let cursorX = 0;
 let cursorY = 0;
 
 const handleMouseMove = (event) => {
-
+  console.log('moved');
   clearTimeout(timeout);
 
-  timeout = setTimeout((event) => {
+  setTimeout(() => {
     cursorMoving = true;
+    lastMoved = Date.now();
     cursorX = event.clientX;
     cursorY = event.clientY;
+    console.log(cursorX, cursorY)
   }, 100);
 
+  timeout = setTimeout(onMouseStop, 1000);
 };
+
+function onMouseStop() {
+    cursorMoving = false;
+    console.log('stopped');
+}
 
 // Scroll in animation logic
 function onIntersection(elements, observer) {
@@ -150,6 +160,7 @@ function initializeWalrusBowls() {
   const scaleExp = 'scale(' + eyeScale + ')';
   leftEye.style.transform = scaleExp;
   rightEye.style.transform = scaleExp;
+
 }
 
 function getAngleToCursor(eye) {
@@ -228,15 +239,8 @@ window.addEventListener('resize', () => {
   initializeWalrusBowls();
 });
 
-document.addEventListener('mousemove', (event) => {
-  cursorMoving = true;
-  cursorX = event.clientX;
-  cursorY = event.clientY;
-});
-
-document.addEventListener('mousestop', () => {
-  cursorMoving = false;
-});
+document.addEventListener('mousemove', handleMouseMove);
+setInterval(checkStopped, 50);
 
 if (Shopify.designMode) {
   document.addEventListener('shopify:section:load', (event) => initializeScrollAnimationTrigger(event.target, true));

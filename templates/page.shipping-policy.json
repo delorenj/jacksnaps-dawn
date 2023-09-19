@@ -1,0 +1,111 @@
+{
+  "sections": {
+    "e00ef906-bafb-45ea-acee-776d8b8d521c": {
+      "type": "image-banner",
+      "blocks": {
+        "template--20794765869367__e00ef906-bafb-45ea-acee-776d8b8d521c-heading-1": {
+          "type": "heading",
+          "settings": {
+            "heading": "<strong>Our Stupid Story<\/strong>",
+            "heading_size": "h0"
+          }
+        },
+        "template--20794765869367__e00ef906-bafb-45ea-acee-776d8b8d521c-text-1": {
+          "type": "text",
+          "settings": {
+            "text": "So, what the heck is a Jacksnap?",
+            "text_style": "body"
+          }
+        }
+      },
+      "block_order": [
+        "template--20794765869367__e00ef906-bafb-45ea-acee-776d8b8d521c-heading-1",
+        "template--20794765869367__e00ef906-bafb-45ea-acee-776d8b8d521c-text-1"
+      ],
+      "settings": {
+        "image": "shopify:\/\/shop_images\/stiny_banner_3.png",
+        "image_overlay_opacity": 50,
+        "image_height": "small",
+        "desktop_content_position": "middle-center",
+        "show_text_box": false,
+        "desktop_content_alignment": "center",
+        "color_scheme": "inverse",
+        "image_behavior": "ambient",
+        "mobile_content_alignment": "center",
+        "stack_images_on_mobile": true,
+        "show_text_below": true
+      }
+    },
+    "5ae21045-186f-47d4-b83a-893dd0e8d9d7": {
+      "type": "multirow",
+      "blocks": {
+        "template--20794765869367__5ae21045-186f-47d4-b83a-893dd0e8d9d7-row-1": {
+          "type": "row",
+          "settings": {
+            "image": "shopify:\/\/shop_images\/mancakes_light.png",
+            "caption": "What's a Jacksnaps",
+            "heading": "<strong>JackSnap<\/strong> [jack·snap] <em>noun<\/em>",
+            "text": "<ol><li>A phrase or sentence characterized by a whimsical, nonsensical, and sometimes absurdist structure<\/li><li>A creative linguistic tool utilized in humor and art: Used to foster creativity, fun, and unique communications in informal settings<\/li><\/ol>",
+            "button_label": "MANCAKES",
+            "button_link": "shopify:\/\/products\/mancakes"
+          }
+        },
+        "template--20794765869367__5ae21045-186f-47d4-b83a-893dd0e8d9d7-row-2": {
+          "type": "row",
+          "settings": {
+            "image": "shopify:\/\/shop_images\/horse-tongs-dark_0.5x.png",
+            "caption": "But these are dumb",
+            "heading": "Yes.",
+            "text": "<p>We firmly belive dumb is awesome. Why do my clothes have to make sense? Does your \"normy\" shirt ever spark a conversation? Probably not - but these Horse Tongs certainly will.<\/p>",
+            "button_label": "HORSE TONGS",
+            "button_link": "shopify:\/\/products\/horse-tongs-military-grade"
+          }
+        },
+        "template--20794765869367__5ae21045-186f-47d4-b83a-893dd0e8d9d7-row-3": {
+          "type": "row",
+          "settings": {
+            "image": "shopify:\/\/shop_images\/pee_chips.jpg",
+            "caption": "Where do they come from?",
+            "heading": "Back in 2007",
+            "text": "<p>That's when the first official Jacksnap was birthed. It flomped out of the sticky amniotic fluids of our brains and landed on the floor of the engineering lab that we worked in at the time. It was dumb. We both laughed. We were surprised that we both found it hilarious - after all, my sick and non-sensical humor was unique! But now it wasn't! Now I had an equally bizarre friend to share these with. It wasn't long until we gave them a name, and since then have been sharing them back and forth, much to the dismay of our wives - who both think that we need professional help.<\/p>",
+            "button_label": "",
+            "button_link": ""
+          }
+        }
+      },
+      "block_order": [
+        "template--20794765869367__5ae21045-186f-47d4-b83a-893dd0e8d9d7-row-1",
+        "template--20794765869367__5ae21045-186f-47d4-b83a-893dd0e8d9d7-row-2",
+        "template--20794765869367__5ae21045-186f-47d4-b83a-893dd0e8d9d7-row-3"
+      ],
+      "settings": {
+        "image_height": "adapt",
+        "desktop_image_width": "medium",
+        "heading_size": "h1",
+        "text_style": "body",
+        "button_style": "secondary",
+        "desktop_content_position": "middle",
+        "desktop_content_alignment": "left",
+        "image_layout": "alternate-left",
+        "section_color_scheme": "",
+        "row_color_scheme": "",
+        "mobile_content_alignment": "left",
+        "padding_top": 36,
+        "padding_bottom": 36
+      }
+    },
+    "main": {
+      "type": "main-page",
+      "disabled": true,
+      "settings": {
+        "padding_top": 28,
+        "padding_bottom": 28
+      }
+    }
+  },
+  "order": [
+    "e00ef906-bafb-45ea-acee-776d8b8d521c",
+    "5ae21045-186f-47d4-b83a-893dd0e8d9d7",
+    "main"
+  ]
+}

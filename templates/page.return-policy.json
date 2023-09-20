@@ -1,0 +1,82 @@
+{
+  "sections": {
+    "e00ef906-bafb-45ea-acee-776d8b8d521c": {
+      "type": "image-banner",
+      "blocks": {
+        "template--20794765869367__e00ef906-bafb-45ea-acee-776d8b8d521c-heading-1": {
+          "type": "heading",
+          "settings": {
+            "heading": "<strong>Shipping Policy<\/strong>",
+            "heading_size": "h0"
+          }
+        },
+        "template--20794765869367__e00ef906-bafb-45ea-acee-776d8b8d521c-text-1": {
+          "type": "text",
+          "settings": {
+            "text": "When do I get my stupid stuff?",
+            "text_style": "body"
+          }
+        }
+      },
+      "block_order": [
+        "template--20794765869367__e00ef906-bafb-45ea-acee-776d8b8d521c-heading-1",
+        "template--20794765869367__e00ef906-bafb-45ea-acee-776d8b8d521c-text-1"
+      ],
+      "settings": {
+        "image": "shopify:\/\/shop_images\/shipping_banner.png",
+        "image_overlay_opacity": 50,
+        "image_height": "small",
+        "desktop_content_position": "middle-center",
+        "show_text_box": false,
+        "desktop_content_alignment": "center",
+        "color_scheme": "inverse",
+        "image_behavior": "ambient",
+        "mobile_content_alignment": "center",
+        "stack_images_on_mobile": true,
+        "show_text_below": true
+      }
+    },
+    "5ae21045-186f-47d4-b83a-893dd0e8d9d7": {
+      "type": "multirow",
+      "settings": {
+        "image_height": "adapt",
+        "desktop_image_width": "medium",
+        "heading_size": "h1",
+        "text_style": "body",
+        "button_style": "secondary",
+        "desktop_content_position": "middle",
+        "desktop_content_alignment": "left",
+        "image_layout": "alternate-left",
+        "section_color_scheme": "",
+        "row_color_scheme": "",
+        "mobile_content_alignment": "left",
+        "padding_top": 36,
+        "padding_bottom": 36
+      }
+    },
+    "main": {
+      "type": "main-page",
+      "disabled": true,
+      "settings": {
+        "padding_top": 28,
+        "padding_bottom": 28
+      }
+    },
+    "79dfd0fc-ce0d-4693-ae80-fb61f8ec08fc": {
+      "type": "page",
+      "settings": {
+        "page": "shipping-policy",
+        "heading_size": "h1",
+        "color_scheme": "",
+        "padding_top": 36,
+        "padding_bottom": 36
+      }
+    }
+  },
+  "order": [
+    "e00ef906-bafb-45ea-acee-776d8b8d521c",
+    "5ae21045-186f-47d4-b83a-893dd0e8d9d7",
+    "main",
+    "79dfd0fc-ce0d-4693-ae80-fb61f8ec08fc"
+  ]
+}

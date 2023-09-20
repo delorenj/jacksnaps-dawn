@@ -6,14 +6,14 @@
         "template--20794765869367__e00ef906-bafb-45ea-acee-776d8b8d521c-heading-1": {
           "type": "heading",
           "settings": {
-            "heading": "<strong>Shipping Policy<\/strong>",
+            "heading": "<strong>Refund Policy<\/strong>",
             "heading_size": "h0"
           }
         },
         "template--20794765869367__e00ef906-bafb-45ea-acee-776d8b8d521c-text-1": {
           "type": "text",
           "settings": {
-            "text": "When do I get my stupid stuff?",
+            "text": "I don’t want this stupid stuff!",
             "text_style": "body"
           }
         }
@@ -65,7 +65,7 @@
     "79dfd0fc-ce0d-4693-ae80-fb61f8ec08fc": {
       "type": "page",
       "settings": {
-        "page": "shipping-policy",
+        "page": "refund-policy",
         "heading_size": "h1",
         "color_scheme": "",
         "padding_top": 36,
